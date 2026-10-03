@@ -84,7 +84,18 @@ export function InnovationCard({ innovation }: { innovation: CatalogInnovation }
         )}
         {status === "ready" && variants && (
           <>
-            <div role="tablist" aria-label="Warianty wdrożeniowe" className="flex flex-wrap gap-2">
+            <div
+              role="tablist"
+              aria-label="Warianty wdrożeniowe"
+              className="flex flex-wrap gap-2"
+              onKeyDown={(event) => {
+                if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
+                event.preventDefault();
+                const next = tab === "miasto" ? "wies" : "miasto";
+                setTab(next);
+                document.getElementById(`${baseId}-${next}`)?.focus();
+              }}
+            >
               {(
                 [
                   ["miasto", "Miasto"],
