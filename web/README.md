@@ -66,8 +66,9 @@ Taksonomia: 8 wyzwań (Mapa Wyzwań) + 9 kategorii Biblioteki ROPS.
 
 ## Dokumentacja
 
-- Opis produktowy: `../szczep_opis_platformy.md`
+- Wartość dla instytucji: `../docs/szczep/wartosc-dla-instytucji.md`
+- Opis produktowy: `../docs/szczep/opis-produktowy.md`
 - Design system: `docs/DESIGN.md`
-- Źródła: `../źródła.md`
+- Źródła: `../docs/szczep/zrodla.md`
 - Licencje zależności: `THIRD_PARTY.md`
 - Użycie AI: `AI_USE.md`

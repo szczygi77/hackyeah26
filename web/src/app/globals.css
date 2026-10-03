@@ -98,6 +98,7 @@
 html {
   font-size: 112.5%;
   overflow-x: clip;
+  width: 100%;
 }
 
 html[data-tekst="2"] {
@@ -115,11 +116,20 @@ html[data-tekst="3"] body {
 body {
   margin: 0;
   min-height: 100vh;
+  width: 100%;
   color: var(--ink);
   font-family: var(--font-body);
   background: var(--bg);
   line-height: 1.5;
   padding-bottom: 5.5rem;
+  overflow-x: clip;
+}
+
+img,
+svg,
+video,
+iframe {
+  max-width: 100%;
 }
 
 h1,
@@ -171,8 +181,18 @@ a:hover {
 
 .shell {
   width: 100%;
+  max-width: none;
   margin: 0;
   padding: 0;
+}
+
+#tresc {
+  width: 100%;
+}
+
+#tresc > *:not(.home) {
+  width: 100%;
+  padding-inline: clamp(1rem, 4vw, 5rem);
 }
 
 .site-header-row,
@@ -180,9 +200,9 @@ a:hover {
 .footer-grid,
 .footer-bottom {
   width: 100%;
-  max-width: 1920px;
-  margin-inline: auto;
-  padding-inline: clamp(1rem, 4vw, 4rem);
+  max-width: none;
+  margin-inline: 0;
+  padding-inline: clamp(1rem, 4vw, 5rem);
 }
 
 .site-header {
@@ -1152,7 +1172,8 @@ h1 {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  max-width: 44rem;
+  width: min(64rem, 100%);
+  max-width: 100%;
   text-align: left;
   align-items: flex-start;
 }
@@ -1236,7 +1257,7 @@ h1 {
 
 .home-hero .home-search {
   width: 100%;
-  max-width: 44rem;
+  max-width: none;
 }
 
 .home-search {
@@ -1716,7 +1737,7 @@ h1 {
   }
 
   .listing-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .listing-detail {
@@ -1746,12 +1767,65 @@ h1 {
     flex-direction: column;
     gap: 0.35rem;
   }
+
+  .category-tile strong {
+    max-width: 100%;
+  }
+
+  .listing-card:hover {
+    transform: none;
+  }
+}
+
+@media (max-width: 480px) {
+  html {
+    font-size: 100%;
+  }
+
+  #tresc > *:not(.home),
+  .site-header-row,
+  .home-block,
+  .footer-grid,
+  .footer-bottom {
+    padding-inline: 0.85rem;
+  }
+
+  .home-hero {
+    padding: 1.5rem 0.85rem;
+  }
+
+  .category-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.85rem 0.4rem;
+  }
+
+  .category-tile-icon-wrapper {
+    width: 56px;
+    height: 56px;
+  }
+
+  .listing-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .example-links a {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .home-hero .droga-switch {
+    width: 100%;
+  }
 }
 
 /* —— Marketplace (OLX-like) —— */
 .category-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
   gap: 1.5rem 1rem;
 }
 
@@ -1848,13 +1922,14 @@ h1 {
 
 .listing-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
   gap: clamp(1rem, 2vw, 1.75rem);
 }
 
 .listing-card {
   display: flex;
   flex-direction: column;
+  min-width: 0;
   background: var(--paper);
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
@@ -2019,9 +2094,10 @@ h1 {
 
 .market-layout {
   display: grid;
-  grid-template-columns: 240px minmax(0, 1fr);
-  gap: 1.25rem;
+  grid-template-columns: minmax(200px, 16rem) minmax(0, 1fr);
+  gap: clamp(1rem, 2vw, 2rem);
   align-items: start;
+  width: 100%;
 }
 
 .market-filters {
