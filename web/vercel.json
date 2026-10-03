@@ -1,0 +1,4 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "cp data/szczep.db prisma/dev.db && prisma generate && next build"
+}

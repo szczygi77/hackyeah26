@@ -1,0 +1,186 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  role         String
+  createdAt    DateTime @default(now())
+  messages     Message[]
+  assigned     Submission[] @relation("AssignedExpert")
+}
+
+model Challenge {
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  title           String
+  definition      String
+  keyChallenges   String
+  personaName     String
+  personaSummary  String
+  personaNeeds    String
+  reportLinksJson String   @default("[]")
+  sortOrder       Int      @default(0)
+}
+
+model Innovation {
+  id                 String         @id @default(cuid())
+  slug               String         @unique
+  title              String
+  summary            String
+  problemsJson       String         @default("[]")
+  category           String
+  challengeAreasJson String         @default("[]")
+  targetGroupsJson   String         @default("[]")
+  elementsJson       String         @default("[]")
+  evidenceLevel      String         @default("UNKNOWN")
+  evidenceNote       String         @default("")
+  authorContact      String         @default("")
+  materialsJson      String         @default("[]")
+  videoUrl           String?
+  transcript         String?
+  searchText         String         @default("")
+  embeddingJson      String         @default("[]")
+  status             String         @default("PUBLISHED")
+  version            Int            @default(1)
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  prerequisites      Prerequisite[]
+  matches            Match[]
+  submissions        Submission[]
+}
+
+model Prerequisite {
+  id           String     @id @default(cuid())
+  innovationId String
+  innovation   Innovation @relation(fields: [innovationId], references: [id], onDelete: Cascade)
+  type         String
+  weight       String
+  description  String
+  quote        String     @default("")
+  origin       String     @default("FROM_CARD")
+}
+
+model Call {
+  id          String   @id @default(cuid())
+  name        String
+  description String   @default("")
+  startsAt    DateTime
+  endsAt      DateTime
+  active      Boolean  @default(true)
+  fieldsJson  String   @default("[]")
+  createdAt   DateTime @default(now())
+}
+
+model Submission {
+  id              String        @id @default(cuid())
+  type            String
+  status          String        @default("NEW")
+  publicId        String        @unique
+  title           String        @default("")
+  body            String
+  contactEmail    String?
+  contactName     String?
+  roleLabel       String?
+  area            String?
+  challengeSlug   String?
+  possibleGap     Boolean       @default(false)
+  canvasJson      String?
+  innovationId    String?
+  innovation      Innovation?   @relation(fields: [innovationId], references: [id])
+  assignedToId    String?
+  assignedTo      User?         @relation("AssignedExpert", fields: [assignedToId], references: [id])
+  rating          Int?
+  improvement     String?
+  partnershipKind String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  statusEvents    StatusEvent[]
+  matches         Match[]
+  thread          Thread?
+  profile         LocalProfile?
+}
+
+model StatusEvent {
+  id           String     @id @default(cuid())
+  submissionId String
+  submission   Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  status       String
+  note         String     @default("")
+  actorRole    String     @default("system")
+  createdAt    DateTime   @default(now())
+}
+
+model Match {
+  id                 String        @id @default(cuid())
+  submissionId       String?
+  submission         Submission?   @relation(fields: [submissionId], references: [id])
+  innovationId       String
+  innovation         Innovation    @relation(fields: [innovationId], references: [id])
+  queryText          String
+  rank               Int
+  score              Float
+  confidence         String
+  justification      String        @default("")
+  quote              String        @default("")
+  middlemanPlanJson  String?
+  createdAt          DateTime      @default(now())
+  profile            LocalProfile?
+}
+
+model LocalProfile {
+  id           String      @id @default(cuid())
+  matchId      String      @unique
+  match        Match       @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  submissionId String?     @unique
+  submission   Submission? @relation(fields: [submissionId], references: [id])
+  answersJson  String      @default("{}")
+  municipality String?
+  createdAt    DateTime    @default(now())
+}
+
+model Thread {
+  id           String     @id @default(cuid())
+  submissionId String     @unique
+  submission   Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  messages     Message[]
+  createdAt    DateTime   @default(now())
+}
+
+model Message {
+  id         String   @id @default(cuid())
+  threadId   String
+  thread     Thread   @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  authorId   String?
+  author     User?    @relation(fields: [authorId], references: [id])
+  authorRole String   @default("author")
+  body       String
+  createdAt  DateTime @default(now())
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  role      String?
+  userId    String?
+  title     String
+  body      String
+  href      String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model MunicipalitySnapshot {
+  id        String @id @default(cuid())
+  name      String @unique
+  powiat    String
+  year      Int
+  statsJson String
+}

@@ -1,0 +1,13 @@
+services:
+  szczep:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: file:/data/szczep.db
+      SESSION_SECRET: docker-demo-session-secret-change-me-32
+    volumes:
+      - szczep-data:/data
+
+volumes:
+  szczep-data:
