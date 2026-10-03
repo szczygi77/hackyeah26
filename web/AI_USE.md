@@ -15,7 +15,3 @@ AI **nie** decyduje o grantach, nie publikuje kart bez admina i nie wymyśla fak
 ## Przy tworzeniu kodu
 
 Kod aplikacji powstawał z asystą AI (Cursor) na podstawie dokumentu `docs/szczep/opis-produktowy.md`. Odpowiedzialność za treść i decyzje produktowe ponosi zespół.
-
-## Wyłączenie
-
-Usuń `OPENAI_API_KEY` i `ANTHROPIC_API_KEY` z środowiska — platforma działa w trybie szablonowym.
