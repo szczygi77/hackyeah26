@@ -29,4 +29,4 @@ Lokalny silnik wyszukiwania używa deterministycznych osadzeń tokenowych (bez z
 
 ## Dane merytoryczne (źródła publiczne ROPS)
 
-Zob. `../źródła.md` — Biblioteka, Mapa Wyzwań, IOSS, Social Canvas, raporty. W demo karty są syntetyczne.
+Zob. `../docs/szczep/zrodla.md` — Biblioteka, Mapa Wyzwań, IOSS, Social Canvas, raporty. W demo karty są syntetyczne.

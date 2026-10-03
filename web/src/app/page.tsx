@@ -26,7 +26,7 @@ export default async function HomePage() {
   const latest = await prisma.innovation.findMany({
     where: { status: "PUBLISHED" },
     orderBy: { title: "asc" },
-    take: 4,
+    take: 8,
     select: {
       slug: true,
       title: true,
