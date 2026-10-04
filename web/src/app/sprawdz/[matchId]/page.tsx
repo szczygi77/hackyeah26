@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Steps } from "@/components/Steps";
 import { prisma } from "@/lib/db";
+import { originLabel } from "@/lib/fit";
 async function fitAction(formData: FormData) {
   "use server";
   const matchId = String(formData.get("matchId"));
@@ -42,21 +43,31 @@ export default async function CheckPage({ params }: { params: Promise<{ matchId:
   if (!match) notFound();
 
   const municipalities = await prisma.municipalitySnapshot.findMany();
-  const prereqs = match.innovation.prerequisites.slice(0, 3);
+  const prereqs = [...match.innovation.prerequisites]
+    .sort((a, b) => {
+      const rank = (weight: string, origin: string) =>
+        (weight === "REQUIRED" ? 0 : 2) + (origin === "FROM_CARD" ? 0 : 1);
+      return rank(a.weight, a.origin) - rank(b.weight, b.origin);
+    })
+    .slice(0, 5);
 
   return (
     <div className="rise">
       <Steps active={2} />
-      <h1>Czy to zadziała u Was?</h1>
+      <h1>Warunki z tej karty</h1>
       <p className="lead">
-        Kontrola warunków dla <strong>{match.innovation.title}</strong>. To lista zgodności, nie prognoza sukcesu.
+        Kontrola warunków dla <strong>{match.innovation.title}</strong>. Odpowiedzi mówią, co deklarujecie. To nie jest
+        prognoza, że wdrożenie się przyjmie.
       </p>
 
       <form action={fitAction} className="panel" style={{ marginTop: "1.25rem" }}>
         <input type="hidden" name="matchId" value={matchId} />
         <div className="field">
-          <label htmlFor="municipality">Gmina (opcjonalnie — snapshot IOSS)</label>
-          <select id="municipality" name="municipality" defaultValue="">
+          <label htmlFor="municipality">Gmina (opcjonalnie)</label>
+          <p className="hint" id="municipality-hint">
+            Snapshot IOSS jest kontekstem gminy. Nie odpowiada na warunki tej karty.
+          </p>
+          <select id="municipality" name="municipality" defaultValue="" aria-describedby="municipality-hint">
             <option value="">— pomiń —</option>
             {municipalities.map((m) => (
               <option key={m.id} value={m.name}>
@@ -70,7 +81,9 @@ export default async function CheckPage({ params }: { params: Promise<{ matchId:
           <fieldset key={p.id} className="field" style={{ border: "none", padding: 0 }}>
             <legend style={{ fontWeight: 700, marginBottom: "0.35rem" }}>
               {p.description}{" "}
-              <span className="hint">({p.weight === "REQUIRED" ? "konieczny" : "pomocny"})</span>
+              <span className="hint">
+                ({p.weight === "REQUIRED" ? "konieczny" : "pomocny"} · {originLabel(p.origin)})
+              </span>
             </legend>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
               <label>

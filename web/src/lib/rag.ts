@@ -1,4 +1,5 @@
-import { cosine, tokenEmbedding, tokenOverlap } from "@/lib/match/embed";
+import { tokenOverlap } from "@/lib/match/embed";
+import { meaningScore } from "@/lib/match/meaning";
 
 const EXPLAIN_SYSTEM_PROMPT =
   "Wyjaśnij w jednym, krótkim zdaniu, dlaczego ta innowacja rozwiązuje problem użytkownika";
@@ -73,7 +74,7 @@ async function matchInnovations(
 
   return rows
     .map((row) => ({ ...row, similarity: scoreMatch(searchQuery, row) }))
-    .filter((row) => row.similarity > 0)
+    .filter((row) => row.similarity >= 0.2)
     .sort((a, b) => b.similarity - a.similarity)
     .slice(0, 3);
 }
@@ -81,8 +82,8 @@ async function matchInnovations(
 function scoreMatch(searchQuery: string, row: InnovationMatchRow): number {
   const hay = `${row.title} ${row.description} ${row.requirements} ${row.category}`;
   const overlap = tokenOverlap(searchQuery, hay);
-  const similar = cosine(tokenEmbedding(searchQuery), tokenEmbedding(hay));
-  return Math.max(overlap, similar);
+  const meaning = meaningScore(searchQuery, `${row.category} ${row.title}`);
+  return 0.65 * overlap + 0.35 * meaning;
 }
 
 async function explainMatch(

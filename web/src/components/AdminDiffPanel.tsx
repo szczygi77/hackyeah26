@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import type { PendingDraft } from "@/lib/catalog";
 import { publishDraftAction } from "@/lib/actions/publish-draft";
 
@@ -34,7 +35,9 @@ export function AdminDiffPanel({ drafts }: { drafts: PendingDraft[] }) {
       {items.map((draft) => (
         <section key={draft.id} aria-labelledby={`draft-${draft.id}`} className="flex flex-col gap-4">
           <h2 id={`draft-${draft.id}`} className="m-0 text-2xl font-semibold text-[var(--ink)]">
-            {draft.title}
+            <Link href={`/innowacja/${draft.innovationId}`} className="text-[var(--ink)] underline-offset-4 hover:underline">
+              {draft.title}
+            </Link>
           </h2>
           <div className="grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-[var(--line-strong)] bg-[var(--line-strong)] md:grid-cols-2">
             <div className="bg-[var(--paper)] p-5">

@@ -169,15 +169,6 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
               Sprawdź u siebie
             </button>
           </form>
-          <Link className="btn btn-secondary" href={`/middleman/${card.slug}`}>
-            Middleman — plan wdrożenia
-          </Link>
-          <Link className="btn btn-accent" href={`/tester?slug=${encodeURIComponent(card.slug)}`}>
-            Chcę przetestować
-          </Link>
-          <a className="btn btn-secondary" href="#mentor">
-            Zapytaj mentora
-          </a>
           <Link className="btn btn-secondary" href={`/wyniki?q=${encodeURIComponent(problems[0] || card.title)}`}>
             Szukaj podobnych
           </Link>

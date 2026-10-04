@@ -1,5 +1,11 @@
 import type { Prerequisite } from "@prisma/client";
 
+export function originLabel(origin: string): string {
+  if (origin === "FROM_CARD") return "z karty";
+  if (origin === "DERIVED") return "wyprowadzone z elementów — propozycja, nie cytat";
+  return "pochodzenie niepodane";
+}
+
 export type FitResult = {
   have: Prerequisite[];
   missing: Prerequisite[];

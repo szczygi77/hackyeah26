@@ -1,9 +1,11 @@
 import { requireRole } from "@/lib/auth-guard";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { ReviewCard } from "./review-card";
 
 type InnovationEmbed = {
+  id: string;
   title: string;
   description: string;
   requirements: string;
@@ -32,7 +34,7 @@ export default async function AdminQueuePage({
 
   const { data, error } = await supabase
     .from("innovation_drafts")
-    .select("id, proposed_variants, innovations(title, description, requirements)")
+    .select("id, proposed_variants, innovations(id, title, description, requirements)")
     .eq("status", "PENDING_APPROVAL")
     .order("id");
 
@@ -46,8 +48,18 @@ export default async function AdminQueuePage({
 
   return (
     <div className="mx-auto w-full max-w-5xl bg-white px-1 py-8 text-neutral-950">
-      <h1 className="text-3xl font-semibold tracking-tight">Kolejka akceptacji</h1>
-      <p className="mt-2 text-lg">Szkice wysłane przez innowatorów, czekające na decyzję ROPS.</p>
+      <p className="text-base">
+        <Link href="/admin" className="text-neutral-950 underline">
+          Panel administratora
+        </Link>
+      </p>
+      <h1 className="mt-4 text-3xl font-semibold tracking-tight">Kolejka akceptacji</h1>
+      <p className="mt-2 text-lg">
+        Szkice wysłane przez innowatorów, czekające na decyzję ROPS.{" "}
+        <Link href="/admin/warianty" className="text-neutral-950 underline">
+          Porównanie obok siebie
+        </Link>
+      </p>
 
       {message && (
         <p
@@ -73,6 +85,7 @@ export default async function AdminQueuePage({
               <ReviewCard
                 key={draft.id}
                 draftId={draft.id}
+                innovationId={card.id}
                 title={card.title}
                 description={card.description}
                 requirements={card.requirements}

@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { PrivacyNote } from "@/components/PrivacyNote";
 import { CategoryGrid } from "@/components/CategoryGrid";
@@ -21,8 +20,6 @@ const EXAMPLES = [
 ];
 
 export default async function HomePage() {
-  const droga = (await cookies()).get("szczep_droga")?.value;
-  const pomoc = droga === "pomoc";
   const latest = await prisma.innovation.findMany({
     where: { status: "PUBLISHED" },
     orderBy: { title: "asc" },
@@ -41,10 +38,10 @@ export default async function HomePage() {
     <div className="home">
       <section className="home-hero" id="szukaj" aria-labelledby="search-heading">
         <div className="home-hero-content">
-        <h1 id="search-heading">Opisz problem, który chcesz rozwiązać</h1>
+        <h1 id="search-heading">Znajdź innowację do wdrożenia w gminie</h1>
         <p className="home-lead">
-          Przeszukaj Bibliotekę Innowacji ROPS Kraków. Znajdź rozwiązania, które zadziałały w innych gminach,
-          i sprawdź, czy pasują do Twojej sytuacji.
+          Dla urzędu, CUS i organizacji. Opisujesz problem lokalny zwykłymi słowami i dostajesz karty z Biblioteki
+          Innowacji ROPS Kraków. To nie jest pomoc w indywidualnej sprawie mieszkańca.
         </p>
         <form action={searchAction} className="home-search">
           <div className="field">
@@ -65,6 +62,9 @@ export default async function HomePage() {
           </button>
         </form>
         <PrivacyNote id="q-hint" />
+        <p className="hint">
+          <Link href="/zasobnik">Przeglądaj karty w katalogu</Link>
+        </p>
         <div className="example-links">
           <span className="example-label">Przykłady:</span>
           <ul>
@@ -75,18 +75,6 @@ export default async function HomePage() {
             ))}
           </ul>
         </div>
-        <p className="droga-switch">
-          <a className={pomoc ? "is-active" : undefined} href="/api/droga?v=pomoc" aria-current={pomoc ? "true" : undefined}>
-            Szukam pomocy
-          </a>
-          <a
-            className={!pomoc ? "is-active" : undefined}
-            href="/api/droga?v=gmina"
-            aria-current={!pomoc ? "true" : undefined}
-          >
-            Dla gminy lub organizacji
-          </a>
-        </p>
         </div>
       </section>
 

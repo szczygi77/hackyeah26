@@ -83,13 +83,11 @@ export default async function AdminPage() {
         Kolejka zgłoszeń, luki, trendy i nabory. Powiadomienia nieprzeczytane: <strong>{unread}</strong>.
       </p>
 
-      <nav className="nav" style={{ marginBottom: "1.25rem" }}>
-        <Link href="/admin/karta/nowa">Wczytaj kartę (szkic)</Link>
-        <Link href="/admin/karty">Edycja kart</Link>
-        <Link href="/admin/nabory">Nabory</Link>
-        <Link href="/api/export/karty">Eksport kart JSON</Link>
-        <Link href="/api/export/zgloszenia">Eksport zgłoszeń JSON</Link>
-      </nav>
+      <p className="hint">
+        <a href="/api/export/karty">Eksport kart JSON</a>
+        {" · "}
+        <a href="/api/export/zgloszenia">Eksport zgłoszeń JSON</a>
+      </p>
 
       {notifications.length > 0 && (
         <section className="panel" style={{ marginBottom: "1rem" }}>
@@ -111,7 +109,8 @@ export default async function AdminPage() {
             <article key={s.id} className="panel">
               <p className="hint" style={{ marginTop: 0 }}>
                 {s.publicId} · {STATUS_LABEL[s.status] || s.status} · {s.type}
-                {s.possibleGap ? " · LUKA" : ""}
+                {s.possibleGap ? " · brak w Bibliotece" : ""}
+                {s.area === "warunki" ? " · lista braków" : ""}
               </p>
               <h3 style={{ margin: "0 0 0.35rem", fontSize: "1.15rem" }}>
                 <Link href={`/admin/zgloszenie/${s.id}`}>{s.title || s.body.slice(0, 60)}</Link>
@@ -124,7 +123,9 @@ export default async function AdminPage() {
 
       <section style={{ marginTop: "2rem" }}>
         <h2>Ranking luk (zgrupowane)</h2>
-        <p className="hint">Klasteryzacja po podobieństwie opisów (osadzenia tokenowe).</p>
+        <p className="hint">
+          Tylko zgłoszenia oznaczone jako możliwy brak w Bibliotece. Krótkie zapytanie nie wchodzi do tego rankingu.
+        </p>
         {gapClusters.length === 0 ? (
           <p className="hint">Brak zgłoszeń luk.</p>
         ) : (

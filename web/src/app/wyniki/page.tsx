@@ -21,8 +21,9 @@ async function saveGapAction(formData: FormData) {
       type: "GAP",
       status: "ACCEPTED",
       publicId: publicSubmissionId(),
-      title: "Możliwa luka w Bibliotece",
+      title: "Możliwy brak w Bibliotece",
       body: q,
+      area: "biblioteka",
       possibleGap: true,
       statusEvents: {
         create: { status: "ACCEPTED", note: "Zgłoszenie luki przyjęte automatycznie", actorRole: "system" },
@@ -73,9 +74,8 @@ export default async function ResultsPage({
   const { q = "" } = await searchParams;
   if (!q.trim()) redirect("/");
 
-  const { query, masked, results, possibleGap, flags } = await searchInnovations(q);
+  const { query, masked, results, gapKind, flags } = await searchInnovations(q);
   const prosty = (await cookies()).get("szczep_prosty")?.value === "1";
-  const droga = (await cookies()).get("szczep_droga")?.value === "pomoc" ? "pomoc" : "gmina";
   const skipAi = flags.crisis;
   const useAi = !skipAi && aiEnabled();
 
@@ -103,11 +103,7 @@ export default async function ResultsPage({
     <div className="rise">
       <Steps active={1} />
       <h1>Dopasowane ogłoszenia</h1>
-      <p className="droga-now">
-        {droga === "pomoc" ? "Szukasz pomocy" : "Szukasz dla gminy"}
-        {" · "}
-        <Link href="/">zmień</Link>
-      </p>
+      <p className="droga-now">Katalog do wdrożenia w gminie, CUS albo organizacji. To nie jest pomoc w indywidualnej sprawie.</p>
       <p className="lead">
         Zapytanie: <em>«{query}»</em>
         {masked ? " (ukryto dane osobowe)" : ""}.
@@ -154,12 +150,11 @@ export default async function ResultsPage({
         </aside>
       )}
 
-      {flags.shortQuery && (
+      {flags.shortQuery && results.length > 0 && (
         <aside className="panel" style={{ marginBottom: "1rem" }}>
           <p style={{ margin: 0 }}>
-            Zapytanie jest bardzo krótkie ({flags.wordCount}{" "}
-            {flags.wordCount === 1 ? "słowo" : "słowa"}). Pokazujemy najbliższe wyniki — doprecyzuj problem (kto,
-            gdzie, co się stało), aby poprawić trafność.
+            Zapytanie ma {flags.wordCount} {flags.wordCount === 1 ? "słowo" : "słowa"}. Dopisz, kogo dotyczy problem i
+            co się stało — krótkie hasło łatwo pomylić z inną kartą.
           </p>
         </aside>
       )}
@@ -182,9 +177,6 @@ export default async function ResultsPage({
               footer={
                 <>
                   <Link href={`/karta/${r.innovation.slug}`}>Zobacz ogłoszenie</Link>
-                  {droga === "gmina" ? (
-                    <Link href={`/middleman/${r.innovation.slug}`}>Plan wdrożenia</Link>
-                  ) : null}
                   <form action={startFitAction}>
                     <input type="hidden" name="innovationId" value={r.innovation.id} />
                     <input type="hidden" name="queryText" value={query} />
@@ -194,7 +186,7 @@ export default async function ResultsPage({
                     <input type="hidden" name="justification" value={r.justification} />
                     <input type="hidden" name="quote" value={r.quote} />
                     <button type="submit" className="btn btn-compact">
-                      {droga === "pomoc" ? "Zapytaj, czy to u nas działa" : "Sprawdź warunki u siebie"}
+                      Sprawdź warunki u siebie
                     </button>
                   </form>
                   <p className="hint" style={{ width: "100%", margin: 0 }}>
@@ -209,11 +201,29 @@ export default async function ResultsPage({
         })}
       </div>
 
-      {possibleGap && !flags.crisis && (
-        <aside className="panel gap-invite">
-          <h2 style={{ fontSize: "1.25rem", marginTop: 0 }}>W Bibliotece nie ma mocnego dopasowania</h2>
+      {results.length === 0 && !flags.crisis && (
+        <p className="hint">Żadna karta nie weszła powyżej progu. Słabe podobieństwo słów nie jest rekomendacją.</p>
+      )}
+
+      {gapKind === "wording" && (
+        <aside className="panel" style={{ marginTop: "1.5rem" }}>
+          <h2 style={{ fontSize: "1.25rem", marginTop: 0 }}>Może błąd słów</h2>
           <p>
-            To sygnał dla ROPS, nie błąd wyszukiwania. Możesz opisać problem dokładniej albo zgłosić potrzebę.
+            Zapytanie jest za krótkie albo za ogólne, żeby uznać brak karty. Dopisz, kogo dotyczy problem i co się
+            stało, a potem szukaj ponownie. Tego nie zapisujemy jako luki w Bibliotece.
+          </p>
+          <Link className="btn" href="/">
+            Popraw opis
+          </Link>
+        </aside>
+      )}
+
+      {gapKind === "library" && (
+        <aside className="panel gap-invite">
+          <h2 style={{ fontSize: "1.25rem", marginTop: 0 }}>Może brak w Bibliotece</h2>
+          <p>
+            Opis jest konkretny, a żadna opublikowana karta nie przekroczyła progu. To może być luka w katalogu. Jeśli
+            słowa były nietrafione, wróć i opisz problem inaczej.
           </p>
           <form action={saveGapAction}>
             <input type="hidden" name="q" value={query} />

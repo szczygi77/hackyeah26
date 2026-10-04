@@ -61,7 +61,8 @@ export default async function AdminSubmissionPage({ params }: { params: Promise<
       <h1>{sub.publicId}</h1>
       <p className="lead">
         {sub.type} · status {STATUS_LABEL[sub.status] || sub.status}
-        {sub.possibleGap ? " · możliwa luka" : ""}
+        {sub.possibleGap ? " · możliwy brak w Bibliotece" : ""}
+        {sub.area === "warunki" ? " · lista braków" : ""}
       </p>
       <div className="panel">
         <p>{sub.body}</p>

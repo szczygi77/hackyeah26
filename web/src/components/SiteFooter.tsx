@@ -1,9 +1,11 @@
 import Link from "next/link";
-import { getSession } from "@/lib/session";
 import { BrandMark } from "@/components/BrandMark";
+import { getAccountKind } from "@/lib/account";
+import { signOutInnovator } from "@/lib/actions/sign-out-innovator";
+import { CATALOG_LINKS, MORE_LINKS } from "@/lib/nav";
 
 export async function SiteFooter() {
-  const session = await getSession();
+  const account = await getAccountKind();
 
   return (
     <footer className="site-footer">
@@ -14,60 +16,70 @@ export async function SiteFooter() {
             Biblioteka sprawdzonych innowacji społecznych dla gmin i organizacji z Małopolski.
           </p>
         </div>
-        <nav className="footer-col" aria-label="Odkryj">
-          <p className="footer-heading">Odkryj</p>
+        <nav className="footer-col" aria-label="Katalog">
+          <p className="footer-heading">Katalog</p>
           <ul>
-            <li>
-              <Link href="/zasobnik">Ogłoszenia</Link>
-            </li>
-            <li>
-              <Link href="/wyzwania">Wyzwania</Link>
-            </li>
-            <li>
-              <Link href="/partnerstwa">Partnerstwa</Link>
-            </li>
+            {CATALOG_LINKS.map((link) => (
+              <li key={link.href}>
+                <Link href={link.href}>{link.label}</Link>
+              </li>
+            ))}
           </ul>
         </nav>
-        <nav className="footer-col" aria-label="Pomoc">
-          <p className="footer-heading">Pomoc</p>
+        <nav className="footer-col" aria-label="Więcej">
+          <p className="footer-heading">Więcej</p>
           <ul>
-            <li>
-              <Link href="/tester">Jak to działa</Link>
-            </li>
-            <li>
-              <Link href="/pomysl">Zgłoś pomysł</Link>
-            </li>
-            <li>
-              <Link href="/nabor/subskrypcja">Nabory</Link>
-            </li>
+            {MORE_LINKS.map((link) => (
+              <li key={link.href}>
+                <Link href={link.href}>{link.label}</Link>
+              </li>
+            ))}
           </ul>
         </nav>
-        <nav className="footer-col" aria-label="ROPS">
-          <p className="footer-heading">ROPS</p>
+        <nav className="footer-col" aria-label="Konto">
+          <p className="footer-heading">Konto</p>
           <ul>
-            {session.isLoggedIn ? (
+            {account === "ADMIN" && (
+              <li>
+                <Link href="/admin">Panel ROPS</Link>
+              </li>
+            )}
+            {account === "EXPERT" && (
+              <li>
+                <Link href="/ekspert">Panel eksperta</Link>
+              </li>
+            )}
+            {account === "INNOVATOR" && (
+              <li>
+                <Link href="/innowator/dashboard">Twoje innowacje</Link>
+              </li>
+            )}
+            {account === "GUEST" && (
               <>
-                {session.role === "ADMIN" && (
-                  <li>
-                    <Link href="/admin">Panel ROPS</Link>
-                  </li>
-                )}
-                {session.role === "EXPERT" && (
-                  <li>
-                    <Link href="/ekspert">Panel eksperta</Link>
-                  </li>
-                )}
                 <li>
-                  <form action="/api/auth/logout" method="post">
-                    <button type="submit" className="footer-logout">
-                      Wyloguj
-                    </button>
-                  </form>
+                  <Link href="/logowanie">Pracownik ROPS</Link>
+                </li>
+                <li>
+                  <Link href="/login">Innowator</Link>
                 </li>
               </>
-            ) : (
+            )}
+            {account === "ADMIN" || account === "EXPERT" ? (
               <li>
-                <Link href="/logowanie">Dla pracowników ROPS</Link>
+                <form action="/api/auth/logout" method="post">
+                  <button type="submit" className="footer-logout">
+                    Wyloguj
+                  </button>
+                </form>
+              </li>
+            ) : null}
+            {account === "INNOVATOR" && (
+              <li>
+                <form action={signOutInnovator}>
+                  <button type="submit" className="footer-logout">
+                    Wyloguj
+                  </button>
+                </form>
               </li>
             )}
           </ul>
@@ -75,7 +87,7 @@ export async function SiteFooter() {
       </div>
       <div className="footer-bottom">
         <p>© 2026 ROPS Kraków — Małopolski Hub Innowacji Społecznych.</p>
-        <p className="footer-meta">Prototyp pilotażowy. Bez danych osób trzecich. Bez logowania.</p>
+        <p className="footer-meta">Prototyp pilotażowy. Bez danych osób trzecich.</p>
       </div>
     </footer>
   );

@@ -75,7 +75,11 @@ export default async function InnovatorDashboardPage({
             const draft = reviewDraft(innovation.innovation_drafts);
             return (
               <li key={innovation.id} className="py-4">
-                <h2 className="text-xl font-semibold">{innovation.title}</h2>
+                <h2 className="text-xl font-semibold">
+                  <Link href={`/innowacja/${innovation.id}`} className="text-neutral-950 underline">
+                    {innovation.title}
+                  </Link>
+                </h2>
                 <p className="mt-1 text-neutral-800">{innovation.category}</p>
                 {draft && (
                   <Link

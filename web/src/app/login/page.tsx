@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getSession } from "@/lib/session";
 import { createSupabaseServerClient, supabaseEnv } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
@@ -73,7 +74,12 @@ export default async function LoginPage({
   return (
     <div className="mx-auto w-full max-w-md bg-white px-1 py-8 text-neutral-950">
       <h1 className="text-3xl font-semibold tracking-tight text-neutral-950">Logowanie</h1>
-      <p className="mt-2 text-lg text-neutral-800">Panel innowatora i administratora.</p>
+      <p className="mt-2 text-lg text-neutral-800">Konto innowatora.</p>
+      <p className="mt-2 text-lg">
+        <Link href="/logowanie" className="text-neutral-950 underline">
+          Pracownik ROPS loguje się tutaj
+        </Link>
+      </p>
 
       {message && (
         <p className="mt-4 border-2 border-red-800 bg-red-50 px-3 py-2 text-red-950" role="alert">

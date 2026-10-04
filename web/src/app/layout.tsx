@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { Source_Sans_3 } from "next/font/google";
 import "./globals.css";
 import { SiteHeader } from "@/components/SiteHeader";
+import { getAccountKind } from "@/lib/account";
 import { A11yDock } from "@/components/A11yDock";
 import { SiteFooter } from "@/components/SiteFooter";
 
@@ -25,6 +26,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   const scale = tekst === "2" || tekst === "3" ? tekst : "1";
   const motyw = jar.get("szczep_motyw")?.value === "ciemny" ? "ciemny" : "jasny";
   const prosty = jar.get("szczep_prosty")?.value === "1";
+  const account = await getAccountKind();
 
   return (
     <html lang="pl" data-tekst={scale} data-motyw={motyw} suppressHydrationWarning>
@@ -36,7 +38,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
           Prototyp pilotażowy — katalog innowacji w budowie (ROPS Kraków / HubMI).
         </div>
         <div className="shell">
-          <SiteHeader />
+          <SiteHeader account={account} />
           <main id="tresc">{children}</main>
           <SiteFooter />
         </div>

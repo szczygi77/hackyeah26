@@ -52,6 +52,46 @@ async function supabaseFetch<T>(path: string, init?: RequestInit): Promise<T> {
   return (await res.json()) as T;
 }
 
+export async function listCatalogInnovations(): Promise<CatalogInnovation[]> {
+  const rows = await supabaseFetch<InnovationRow[]>(
+    "innovations?select=id,title,description,requirements,category&order=title.asc"
+  );
+  if (!Array.isArray(rows)) throw new RagUpstreamError("Supabase zwróciło nieoczekiwany wynik");
+  return rows;
+}
+
+export type CatalogSurvey = {
+  municipalityType: string;
+  missingResources: string;
+  implementedWorkarounds: string;
+  successRating: number;
+};
+
+export async function listSurveys(innovationId: string): Promise<CatalogSurvey[]> {
+  if (!isInnovationId(innovationId)) return [];
+  try {
+    const rows = await supabaseFetch<
+      {
+        municipality_type: string;
+        missing_resources: string;
+        implemented_workarounds: string;
+        success_rating: number;
+      }[]
+    >(
+      `surveys?innovation_id=eq.${innovationId}&select=municipality_type,missing_resources,implemented_workarounds,success_rating`
+    );
+    if (!Array.isArray(rows)) return [];
+    return rows.map((row) => ({
+      municipalityType: row.municipality_type,
+      missingResources: row.missing_resources,
+      implementedWorkarounds: row.implemented_workarounds,
+      successRating: row.success_rating,
+    }));
+  } catch {
+    return [];
+  }
+}
+
 export async function getCatalogInnovation(id: string): Promise<CatalogInnovation> {
   if (!isInnovationId(id)) throw new AdaptNotFoundError();
   const rows = await supabaseFetch<InnovationRow[]>(

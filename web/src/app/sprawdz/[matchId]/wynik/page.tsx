@@ -1,9 +1,63 @@
-import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { Steps } from "@/components/Steps";
 import { prisma } from "@/lib/db";
-import { evaluateFit } from "@/lib/fit";
+import { evaluateFit, originLabel } from "@/lib/fit";
+import { publicSubmissionId } from "@/lib/ids";
 import { parseJsonObject } from "@/lib/json";
+async function handoffAction(formData: FormData) {
+  "use server";
+  const matchId = String(formData.get("matchId") || "");
+  const match = await prisma.match.findUnique({
+    where: { id: matchId },
+    include: { innovation: { include: { prerequisites: true } }, profile: true },
+  });
+  if (!match?.profile) return;
+
+  const answers = parseJsonObject<Record<string, string>>(match.profile.answersJson);
+  const fit = evaluateFit(match.innovation.prerequisites, answers);
+  const line = (items: { description: string; origin: string }[]) =>
+    items.length ? items.map((p) => `- ${p.description} (${originLabel(p.origin)})`).join("\n") : "- brak";
+  const body = [
+    `Karta: ${match.innovation.title}`,
+    `Zapytanie: ${match.queryText}`,
+    fit.summary,
+    "",
+    "Brakuje:",
+    line(fit.missing),
+    "",
+    "Do sprawdzenia:",
+    line(fit.toCheck),
+    "",
+    "Macie:",
+    line(fit.have),
+  ].join("\n");
+
+  const sub = await prisma.submission.create({
+    data: {
+      type: "PROBLEM",
+      status: "ACCEPTED",
+      publicId: publicSubmissionId(),
+      title: "Lista braków do ROPS",
+      body,
+      area: "warunki",
+      innovationId: match.innovationId,
+      statusEvents: {
+        create: { status: "ACCEPTED", note: "Lista warunków przekazana do ROPS", actorRole: "system" },
+      },
+      thread: { create: {} },
+    },
+  });
+  await prisma.match.update({ where: { id: match.id }, data: { submissionId: sub.id } });
+  await prisma.notification.create({
+    data: {
+      role: "ADMIN",
+      title: "Lista braków do ROPS",
+      body: match.innovation.title,
+      href: `/admin/zgloszenie/${sub.id}`,
+    },
+  });
+  redirect(`/zgloszenie/${sub.publicId}`);
+}
 
 export default async function FitResultPage({ params }: { params: Promise<{ matchId: string }> }) {
   const { matchId } = await params;
@@ -44,7 +98,7 @@ export default async function FitResultPage({ params }: { params: Promise<{ matc
 
       {muniNote && (
         <aside className="panel" style={{ marginBottom: "1rem" }}>
-          <strong>Kontekst gminy (snapshot IOSS):</strong>
+          <strong>Kontekst gminy, nie odpowiedź na warunki karty:</strong>
           <p style={{ marginBottom: 0 }}>{muniNote}</p>
         </aside>
       )}
@@ -53,37 +107,54 @@ export default async function FitResultPage({ params }: { params: Promise<{ matc
         <section className="panel fit-have">
           <h3>Macie to</h3>
           <ul>
-            {fit.have.length ? fit.have.map((p) => <li key={p.id}>{p.description}</li>) : <li className="hint">—</li>}
+            {fit.have.length ? (
+              fit.have.map((p) => (
+                <li key={p.id}>
+                  {p.description} <span className="hint">({originLabel(p.origin)})</span>
+                </li>
+              ))
+            ) : (
+              <li className="hint">—</li>
+            )}
           </ul>
         </section>
         <section className="panel fit-missing">
           <h3>Brakuje</h3>
           <ul>
-            {fit.missing.length ? fit.missing.map((p) => <li key={p.id}>{p.description}</li>) : <li className="hint">—</li>}
+            {fit.missing.length ? (
+              fit.missing.map((p) => (
+                <li key={p.id}>
+                  {p.description} <span className="hint">({originLabel(p.origin)})</span>
+                </li>
+              ))
+            ) : (
+              <li className="hint">—</li>
+            )}
           </ul>
         </section>
         <section className="panel fit-check">
           <h3>Do sprawdzenia</h3>
           <ul>
-            {fit.toCheck.length ? fit.toCheck.map((p) => <li key={p.id}>{p.description}</li>) : <li className="hint">—</li>}
+            {fit.toCheck.length ? (
+              fit.toCheck.map((p) => (
+                <li key={p.id}>
+                  {p.description} <span className="hint">({originLabel(p.origin)})</span>
+                </li>
+              ))
+            ) : (
+              <li className="hint">—</li>
+            )}
           </ul>
         </section>
       </div>
 
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", marginTop: "1.5rem" }}>
-        <Link className="btn" href={`/middleman/${match.innovation.slug}?matchId=${match.id}`}>
-          Dostosuj do mojej instytucji (Middleman)
-        </Link>
-        <Link className="btn btn-accent" href={`/tester?slug=${encodeURIComponent(match.innovation.slug)}`}>
-          Chcę przetestować
-        </Link>
-        <Link className="btn btn-secondary" href={`/karta/${match.innovation.slug}`}>
-          Karta innowacji
-        </Link>
-        <Link className="btn btn-secondary" href="/">
-          Nowe wyszukiwanie
-        </Link>
-      </div>
+      <form action={handoffAction} style={{ marginTop: "1.5rem" }}>
+        <input type="hidden" name="matchId" value={match.id} />
+        <button className="btn" type="submit">
+          Przekaż ROPS listę braków
+        </button>
+      </form>
+      <p className="hint">Plan wdrożenia, test, mentor i partnerstwo są dostępne po przekazaniu tej listy.</p>
     </div>
   );
 }

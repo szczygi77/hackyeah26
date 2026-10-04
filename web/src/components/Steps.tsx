@@ -1,14 +1,14 @@
 const STEPS = [
-  { label: "Opisz", hint: "Własne słowa" },
-  { label: "Dopasuj", hint: "Trzy najbliższe karty" },
-  { label: "Sprawdź", hint: "Czy to u Was zadziała" },
-  { label: "Wdróż", hint: "Plan, test albo mentor" },
+  { label: "Opisz", hint: "Problem gminy lub organizacji" },
+  { label: "Dopasuj", hint: "Karty powyżej progu" },
+  { label: "Sprawdź", hint: "Warunki z karty" },
+  { label: "Przekaż", hint: "Lista braków do ROPS" },
 ] as const;
 
 export function Steps({ active }: { active?: number }) {
   const hasActive = typeof active === "number";
   return (
-    <nav className="steps-panel" aria-label="Kroki: Opisz, Dopasuj, Sprawdź, Wdróż">
+    <nav className="steps-panel" aria-label="Kroki: Opisz, Dopasuj, Sprawdź, Przekaż">
       <ol className="steps">
         {STEPS.map((step, i) => {
           const complete = hasActive && i < active;

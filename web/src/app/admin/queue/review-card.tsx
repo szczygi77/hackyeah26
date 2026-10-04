@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { publishDraft, rejectDraft } from "./actions";
 
 export function ReviewCard({
   draftId,
+  innovationId,
   title,
   description,
   requirements,
@@ -12,6 +14,7 @@ export function ReviewCard({
   urbanVariant,
 }: {
   draftId: string;
+  innovationId: string;
   title: string;
   description: string;
   requirements: string;
@@ -23,7 +26,9 @@ export function ReviewCard({
   return (
     <section className="border-2 border-neutral-900 bg-white p-4 text-neutral-950" aria-labelledby={`draft-${draftId}`}>
       <h2 id={`draft-${draftId}`} className="text-2xl font-semibold">
-        {title}
+        <Link href={`/innowacja/${innovationId}`} className="text-neutral-950 underline">
+          {title}
+        </Link>
       </h2>
       <div className="mt-4 grid gap-4 md:grid-cols-2">
         <div className="border-2 border-neutral-900 p-4">

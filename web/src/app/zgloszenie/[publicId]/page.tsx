@@ -75,10 +75,30 @@ export default async function SubmissionPage({ params }: { params: Promise<{ pub
         Status: <strong>{STATUS_LABEL[sub.status] || sub.status}</strong>
         {sub.possibleGap ? " · oznaczone jako możliwa luka" : ""}
       </p>
-      {sub.type === "GAP" || sub.possibleGap ? (
-        <p>
-          To trafia do kolejki ROPS. Gdy kilka osób opisze to samo, Hub widzi lukę.
-        </p>
+      {sub.area === "biblioteka" || sub.possibleGap ? (
+        <p>Zapisane jako możliwy brak w Bibliotece. Krótkie zapytanie nie trafia do tej kolejki.</p>
+      ) : null}
+      {sub.area === "warunki" && sub.innovation ? (
+        <section className="panel" style={{ marginTop: "1rem" }}>
+          <h2 style={{ marginTop: 0, fontSize: "1.2rem" }}>Dalsze kroki po przekazaniu listy</h2>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
+            <Link className="btn btn-secondary" href={`/middleman/${sub.innovation.slug}`}>
+              Szkic planu wdrożenia
+            </Link>
+            <Link className="btn btn-secondary" href={`/tester?slug=${encodeURIComponent(sub.innovation.slug)}`}>
+              Zgłoś chęć testu
+            </Link>
+            <Link className="btn btn-secondary" href={`/karta/${sub.innovation.slug}#mentor`}>
+              Pytanie do mentora
+            </Link>
+            <Link className="btn btn-secondary" href="/partnerstwa">
+              Partnerstwa
+            </Link>
+            <Link className="btn btn-secondary" href="/pomysl">
+              Własny pomysł
+            </Link>
+          </div>
+        </section>
       ) : null}
 
       <section className="panel">

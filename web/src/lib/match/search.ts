@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db";
-import { parseJsonNumberArray } from "@/lib/json";
-import { cosine, tokenEmbedding, tokenOverlap } from "@/lib/match/embed";
+import { tokenOverlap } from "@/lib/match/embed";
+import { meaningScore } from "@/lib/match/meaning";
 import { maskPii } from "@/lib/match/pii";
 import { analyzeQueryFlags, type QueryFlags } from "@/lib/match/safety";
 import { unknownFields } from "@/lib/match/unknowns";
@@ -16,13 +16,26 @@ export type RankedMatch = {
   unknowns: string[];
 };
 
+export type GapKind = "none" | "wording" | "library";
+
 export type SearchResult = {
   query: string;
   masked: boolean;
   results: RankedMatch[];
   possibleGap: boolean;
+  gapKind: GapKind;
   flags: QueryFlags;
 };
+
+const EVIDENCE_RANK: Record<string, number> = { E3: 4, E2: 3, E1: 2, E0: 1 };
+
+function evidenceRank(level: string): number {
+  return EVIDENCE_RANK[level] ?? 0;
+}
+
+function explicitConditions(card: Innovation & { prerequisites: Prerequisite[] }): number {
+  return card.prerequisites.filter((p) => p.origin === "FROM_CARD").length;
+}
 
 function pickQuote(card: Innovation, query: string): string {
   const chunks = [card.summary, card.searchText]
@@ -64,7 +77,7 @@ export async function searchInnovations(rawQuery: string): Promise<SearchResult>
   const flags = analyzeQueryFlags(query);
 
   if (!query) {
-    return { query, masked: found, results: [], possibleGap: true, flags };
+    return { query, masked: found, results: [], possibleGap: false, gapKind: "none", flags };
   }
 
   // Crisis: still return nearest cards, but caller must show emergency banner first and skip AI
@@ -73,22 +86,24 @@ export async function searchInnovations(rawQuery: string): Promise<SearchResult>
     include: { prerequisites: true },
   });
 
-  const qEmb = tokenEmbedding(query);
   const scored = cards.map((card) => {
-    const emb = parseJsonNumberArray(card.embeddingJson);
-    const semantic = emb.length ? cosine(qEmb, emb) : 0;
-    const lexical = tokenOverlap(query, card.searchText);
-    const score = 0.4 * semantic + 0.6 * lexical;
-    return { card, score, lexical };
+    const lexical = tokenOverlap(query, `${card.title} ${card.summary} ${card.searchText}`);
+    const meaning = meaningScore(query, `${card.category} ${card.challengeAreasJson} ${card.title}`);
+    const score = 0.65 * lexical + 0.35 * meaning;
+    return { card, score, lexical, meaning };
   });
 
-  scored.sort((a, b) => b.score - a.score);
-  const top = scored.slice(0, 3);
+  scored.sort((a, b) => {
+    if (Math.abs(b.score - a.score) > 0.02) return b.score - a.score;
+    const byEvidence = evidenceRank(b.card.evidenceLevel) - evidenceRank(a.card.evidenceLevel);
+    if (byEvidence) return byEvidence;
+    return explicitConditions(b.card) - explicitConditions(a.card);
+  });
 
-  const results: RankedMatch[] = top.map((t) => {
+  const ranked: RankedMatch[] = scored.map((t) => {
     let confidence: ConfidenceLabel = "LOW";
-    if (t.lexical >= 0.5) confidence = "HIGH";
-    else if (t.lexical >= 0.25 || t.score >= 0.22) confidence = "MEDIUM";
+    if (t.lexical >= 0.5 || (t.lexical >= 0.34 && t.meaning >= 0.99)) confidence = "HIGH";
+    else if (t.lexical >= 0.25 || (t.meaning >= 0.99 && t.lexical >= 0.12)) confidence = "MEDIUM";
 
     const quote = pickQuote(t.card, query);
     return {
@@ -101,7 +116,17 @@ export async function searchInnovations(rawQuery: string): Promise<SearchResult>
     };
   });
 
-  const possibleGap = !results.length || results[0].confidence === "LOW";
+  const passed = ranked.filter((r) => r.confidence !== "LOW");
+  const results = (flags.crisis ? ranked : passed).slice(0, 3);
+  const contentTokens = query
+    .toLowerCase()
+    .split(/\s+/)
+    .filter((w) => w.length > 2);
+  const concrete = !flags.shortQuery && contentTokens.length >= 3;
+  let gapKind: GapKind = "none";
+  if (!flags.crisis && passed.length === 0) {
+    gapKind = concrete ? "library" : "wording";
+  }
 
-  return { query, masked: found, results, possibleGap, flags };
+  return { query, masked: found, results, possibleGap: gapKind === "library", gapKind, flags };
 }

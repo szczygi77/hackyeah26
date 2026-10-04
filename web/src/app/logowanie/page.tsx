@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/session";
 import { compareSync } from "bcryptjs";
@@ -45,6 +46,9 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
           Zaloguj
         </button>
       </form>
+      <p className="hint">
+        <Link href="/login">Panel innowatora</Link>
+      </p>
       <p className="hint">
         W pilotażu: <code>admin@demo.szczep</code> / <code>demo1234</code> (admin) oraz{" "}
         <code>ekspert@demo.szczep</code> / <code>demo1234</code> (ekspert).

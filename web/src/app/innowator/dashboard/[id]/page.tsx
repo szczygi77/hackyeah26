@@ -7,7 +7,7 @@ type DraftDetail = {
   id: string;
   status: string;
   proposed_variants: { ruralVariant?: string; urbanVariant?: string } | null;
-  innovations: { title: string; author_id: string } | { title: string; author_id: string }[] | null;
+  innovations: { id: string; title: string; author_id: string } | { id: string; title: string; author_id: string }[] | null;
 };
 
 function one<T>(value: T | T[] | null): T | null {
@@ -74,7 +74,7 @@ export default async function DraftReviewPage({
 
   const { data } = await supabase
     .from("innovation_drafts")
-    .select("id, status, proposed_variants, innovations!inner(title, author_id)")
+    .select("id, status, proposed_variants, innovations!inner(id, title, author_id)")
     .eq("id", id)
     .eq("innovations.author_id", userId)
     .maybeSingle();
@@ -94,7 +94,11 @@ export default async function DraftReviewPage({
           Twoje Innowacje
         </Link>
       </p>
-      <h1 className="mt-4 text-3xl font-semibold tracking-tight">{innovation.title}</h1>
+      <h1 className="mt-4 text-3xl font-semibold tracking-tight">
+        <Link href={`/innowacja/${innovation.id}`} className="text-neutral-950 underline">
+          {innovation.title}
+        </Link>
+      </h1>
       <p className="mt-2 text-lg">Tekst przygotowany przez AI na podstawie ankiet z wdrożeń.</p>
 
       {error && (

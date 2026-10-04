@@ -51,9 +51,9 @@ export function SearchHero() {
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-10 py-16">
       <form onSubmit={onSubmit} className="flex flex-col gap-4" aria-labelledby="search-heading">
-        <h1 id="search-heading" className="m-0 text-center text-3xl font-semibold text-[var(--ink)]">
+        <h2 id="search-heading" className="m-0 text-center text-3xl font-semibold text-[var(--ink)]">
           Opisz problem swoimi słowami
-        </h1>
+        </h2>
         <label htmlFor="problem" className="sr-only">
           Opisz problem swoimi słowami
         </label>
