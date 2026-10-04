@@ -2,7 +2,7 @@ export type NavLink = { href: string; label: string };
 
 export const CATALOG_LINKS: NavLink[] = [
   { href: "/", label: "Start" },
-  { href: "/zasobnik", label: "Ogłoszenia" },
+  { href: "/zasobnik", label: "Katalog" },
   { href: "/wyzwania", label: "Wyzwania" },
 ];
 
