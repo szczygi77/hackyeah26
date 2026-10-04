@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { requireRole } from "@/lib/auth-guard";
 import { clusterGaps } from "@/lib/gaps";
+import { buildTrends } from "@/lib/trends";
 
 const STATUS_LABEL: Record<string, string> = {
   NEW: "Nowe",
@@ -35,17 +36,16 @@ export default async function AdminPage() {
     prisma.notification.count({ where: { role: "ADMIN", read: false } }),
   ]);
 
-  // Trends: submissions per challenge slug last weeks (simple grouping)
   const allForTrends = await prisma.submission.findMany({
-    where: { createdAt: { gte: new Date(Date.now() - 1000 * 60 * 60 * 24 * 60) } },
-    select: { challengeSlug: true, type: true, createdAt: true, possibleGap: true },
+    where: { createdAt: { gte: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7 * 16) } },
+    select: { challengeSlug: true, type: true, area: true, createdAt: true },
   });
-  const trendMap = new Map<string, number>();
-  for (const s of allForTrends) {
-    const key = s.challengeSlug || s.type || "inne";
-    trendMap.set(key, (trendMap.get(key) || 0) + 1);
-  }
-  const trends = [...trendMap.entries()].sort((a, b) => b[1] - a[1]);
+  const trends = buildTrends(
+    allForTrends.map((s) => ({
+      area: s.challengeSlug || s.area || s.type || "inne",
+      createdAt: s.createdAt,
+    }))
+  );
 
   // Missing conditions aggregation from profiles
   const profiles = await prisma.localProfile.findMany({ include: { match: { include: { innovation: { include: { prerequisites: true } } } } } });
@@ -172,25 +172,48 @@ export default async function AdminPage() {
 
       <section style={{ marginTop: "2rem" }}>
         <h2>Trendy potrzeb</h2>
-        <p className="hint">Liczba zgłoszeń wg obszaru/typu (ostatnie ~60 dni). Wykres zastąpiony tabelą (a11y).</p>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead>
-            <tr>
-              <th align="left">Obszar / typ</th>
-              <th align="right">Liczba</th>
-            </tr>
-          </thead>
-          <tbody>
-            {trends.map(([k, v]) => (
-              <tr key={k}>
-                <td style={{ borderTop: "1px solid var(--line)", padding: "0.35rem 0" }}>{k}</td>
-                <td align="right" style={{ borderTop: "1px solid var(--line)" }}>
-                  {v}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <p className="hint">
+          Widok tylko dla administratora. Bieżące 8 tygodni wobec poprzednich 8 tygodni. Liczby tygodni są w tabeli,
+          nie na wykresie kolorowym.
+        </p>
+        {trends.length === 0 ? (
+          <p className="hint">Brak zgłoszeń w ostatnich 16 tygodniach.</p>
+        ) : (
+          <div style={{ overflowX: "auto" }}>
+            <table className="data-table">
+              <caption>Zgłoszenia według obszaru: ten okres, poprzedni okres i kolejne tygodnie</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Obszar</th>
+                  <th scope="col">Ostatnie 8 tygodni</th>
+                  <th scope="col">Poprzednie 8 tygodni</th>
+                  <th scope="col">Zmiana</th>
+                  {trends[0].weeks.map((week) => (
+                    <th scope="col" key={week.label}>
+                      tydz. {week.label}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {trends.map((row) => (
+                  <tr key={row.area}>
+                    <th scope="row">{row.area}</th>
+                    <td>{row.current}</td>
+                    <td>{row.previous}</td>
+                    <td>
+                      {row.delta > 0 ? `+${row.delta}` : row.delta}
+                      {row.delta > 0 ? " wzrost" : row.delta < 0 ? " spadek" : " bez zmiany"}
+                    </td>
+                    {row.weeks.map((week) => (
+                      <td key={week.label}>{week.count}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </section>
 
       <section style={{ marginTop: "2rem" }}>

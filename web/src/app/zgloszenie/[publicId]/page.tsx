@@ -62,6 +62,7 @@ export default async function SubmissionPage({ params }: { params: Promise<{ pub
       statusEvents: { orderBy: { createdAt: "asc" } },
       thread: { include: { messages: { orderBy: { createdAt: "asc" } } } },
       innovation: true,
+      application: { include: { call: true } },
     },
   });
   if (!sub) notFound();
@@ -99,6 +100,31 @@ export default async function SubmissionPage({ params }: { params: Promise<{ pub
             </Link>
           </div>
         </section>
+      ) : null}
+
+      {sub.application ? (
+        <section className="panel" style={{ marginBottom: "1rem" }}>
+          <h2 style={{ marginTop: 0, fontSize: "1.2rem" }}>Wniosek naborowy</h2>
+          <p>
+            Nabór: {sub.application.call.name}. Status:{" "}
+            <strong>
+              {sub.application.status === "RECOMMENDED"
+                ? "rekomendowany do finansowania"
+                : sub.application.status === "REJECTED"
+                  ? "bez rekomendacji finansowania"
+                  : sub.application.status === "SUBMITTED"
+                    ? "złożony, czeka na decyzję"
+                    : sub.application.status}
+            </strong>
+            .
+          </p>
+          <p className="hint">Rekomendacja w prototypie nie jest przelewem.</p>
+          <Link href={`/pomysl/wniosek/${sub.publicId}`}>Otwórz wniosek</Link>
+        </section>
+      ) : sub.type === "IDEA" ? (
+        <p>
+          <Link href={`/pomysl/wniosek/${sub.publicId}`}>Przejdź do wniosku w aktywnym naborze</Link>
+        </p>
       ) : null}
 
       <section className="panel">

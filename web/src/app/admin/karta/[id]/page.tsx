@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { requireRole } from "@/lib/auth-guard";
 import { tokenEmbedding } from "@/lib/match/embed";
 import { parseJsonArray } from "@/lib/json";
+import { getSession } from "@/lib/session";
 
 async function saveCardAction(formData: FormData) {
   "use server";
@@ -33,6 +34,27 @@ async function saveCardAction(formData: FormData) {
   if (!existing) return;
 
   const searchText = [title, summary, ...problems, ...elements, category].join(" ");
+  const session = await getSession();
+  await prisma.innovationRevision.create({
+    data: {
+      innovationId: existing.id,
+      version: existing.version,
+      authorLabel: session.name || session.email || "admin",
+      snapshotJson: JSON.stringify({
+        title: existing.title,
+        summary: existing.summary,
+        category: existing.category,
+        problemsJson: existing.problemsJson,
+        elementsJson: existing.elementsJson,
+        targetGroupsJson: existing.targetGroupsJson,
+        evidenceLevel: existing.evidenceLevel,
+        evidenceNote: existing.evidenceNote,
+        authorContact: existing.authorContact,
+        status: existing.status,
+        savedAt: existing.updatedAt.toISOString(),
+      }),
+    },
+  });
   await prisma.innovation.update({
     where: { id },
     data: {
@@ -68,6 +90,7 @@ export default async function EditCardPage({
     where: { id },
     include: {
       prerequisites: true,
+      revisions: { orderBy: { version: "desc" }, take: 8 },
       submissions: { where: { type: "TEST" }, orderBy: { createdAt: "desc" }, take: 20 },
     },
   });
@@ -84,7 +107,7 @@ export default async function EditCardPage({
       </p>
       <h1>Edycja karty</h1>
       <p className="lead">
-        Wersja aktualna: <strong>v{card.version}</strong>. Zapis tworzy nową wersję.
+        Wersja aktualna: <strong>v{card.version}</strong>. Zapis odkłada poprzednią wersję z datą i autorem.
         {saved ? " Zapisano." : ""}
       </p>
 
@@ -144,6 +167,21 @@ export default async function EditCardPage({
           Zapisz nową wersję
         </button>
       </form>
+
+      <section style={{ marginTop: "1.5rem" }}>
+        <h2>Historia wersji</h2>
+        {card.revisions.length === 0 ? (
+          <p className="hint">Brak starszych wersji. Pierwszy zapis utworzy wpis z datą i autorem.</p>
+        ) : (
+          <ul>
+            {card.revisions.map((rev) => (
+              <li key={rev.id}>
+                v{rev.version} · {rev.authorLabel} · {rev.createdAt.toLocaleString("pl-PL")}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
       <section style={{ marginTop: "1.5rem" }}>
         <h2>Warunki wstępne</h2>

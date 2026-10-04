@@ -9,7 +9,7 @@ import { publicSubmissionId } from "@/lib/ids";
 import { maskPii } from "@/lib/match/pii";
 import { searchInnovations } from "@/lib/match/search";
 import { checkSubmissionLimit, isHoneypotFilled } from "@/lib/limits";
-import { notifyWebhook } from "@/lib/webhook";
+import { notifyAdmins, notifySubscribers } from "@/lib/notify";
 
 async function submitIdeaAction(formData: FormData) {
   "use server";
@@ -61,15 +61,13 @@ async function submitIdeaAction(formData: FormData) {
       thread: { create: {} },
     },
   });
-  await prisma.notification.create({
-    data: {
-      role: "ADMIN",
-      title: "Nowa fiszka pomysłu",
-      body: title || body.slice(0, 120),
-      href: `/admin/zgloszenie/${sub.id}`,
-    },
-  });
-  await notifyWebhook("idea.created", { publicId: sub.publicId, title: sub.title });
+  await notifyAdmins(
+    "Nowa fiszka pomysłu",
+    title || body.slice(0, 120),
+    `/admin/zgloszenie/${sub.id}`,
+    "idea.created"
+  );
+  await notifySubscribers("Nowy pomysł w subskrybowanym obszarze", area || "pomysł", "/pomysl");
 
   if (formData.get("prepareApplication") === "1") {
     redirect(`/pomysl/wniosek/${sub.publicId}`);

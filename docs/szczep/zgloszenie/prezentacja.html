@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <title>Szczep — prezentacja HubMI</title>
+  <style>
+    @page { size: A4 landscape; margin: 14mm; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body { font-family: "Avenir Next", "Segoe UI", sans-serif; color: #142033; }
+    section {
+      page-break-after: always;
+      break-after: page;
+      background: #f4f7fb;
+      position: relative;
+      min-height: 160mm;
+    }
+    section:last-child { page-break-after: auto; }
+    h1 { font-size: 42px; line-height: 1.1; margin: 0 0 8mm; }
+    h2 { font-size: 28px; margin: 0 0 6mm; }
+    p, li { font-size: 18px; line-height: 1.35; }
+    ul { margin: 0; padding-left: 6mm; }
+    .kicker { letter-spacing: 0.08em; text-transform: uppercase; font-size: 13px; color: #3d5a40; }
+    .foot { margin-top: 10mm; font-size: 13px; color: #4c5b70; }
+  </style>
+</head>
+<body>
+  <section>
+    <p class="kicker">HubMI · Małopolski Hub Innowacji Społecznych</p>
+    <h1>Szczep</h1>
+    <p>Platforma, która łączy problem społeczny ze sprawdzoną innowacją i mówi, czy da się ją przenieść.</p>
+    <p>Demo: http://localhost:3000</p>
+    <p>Tytuł zgłoszenia: Szczep. Identyfikator zespołu: z formularza HackTribe.</p>
+    <p class="foot">1 / 10</p>
+  </section>
+  <section>
+    <h2>Problem</h2>
+    <ul>
+      <li>ROPS ma blisko 200 innowacji. Gmina z problemem często zaczyna od zera.</li>
+      <li>Katalog pokazuje, że coś istnieje. Nie mówi, czy zadziała w tej gminie.</li>
+      <li>Szczep dopasowuje, sprawdza warunki i zostawia ślad, gdy Biblioteka nie ma odpowiedzi.</li>
+    </ul>
+    <p class="foot">2 / 10</p>
+  </section>
+  <section>
+    <h2>Moduł obowiązkowy: matchmaking</h2>
+    <ul>
+      <li>Jedno pole. Zwykłe słowa, na przykład „samotni seniorzy po zamknięciu klubu”.</li>
+      <li>Trzy najbliższe karty: dlaczego pasują, czego brakuje, jak mocne są dowody.</li>
+      <li>Słabe dopasowanie jest nazwane. System nie udaje pewności.</li>
+    </ul>
+    <p class="foot">3 / 10</p>
+  </section>
+  <section>
+    <h2>Czy to u nas zadziała</h2>
+    <ul>
+      <li>Krótka lista warunków z karty: macie to, brakuje tego, do ustalenia.</li>
+      <li>To lista zgodności, nie prognoza sukcesu.</li>
+      <li>Dalej: test, mentor, partnerstwo albo szkic planu wdrożenia.</li>
+    </ul>
+    <p class="foot">4 / 10</p>
+  </section>
+  <section>
+    <h2>Zasobnik</h2>
+    <ul>
+      <li>Katalog kart, półka filmów i transkrypcja na karcie.</li>
+      <li>Wyzwania Małopolski oraz czytelnia z omówieniem trzech publikacji.</li>
+      <li>Trendy potrzeb: 8 tygodni wobec poprzednich 8 tygodni, tylko w panelu administratora.</li>
+    </ul>
+    <p class="foot">5 / 10</p>
+  </section>
+  <section>
+    <h2>Pomysł i nabór</h2>
+    <ul>
+      <li>Fiszka: istota, dla kogo, etap. Opcjonalnie kanwa.</li>
+      <li>Aktywny nabór buduje własne pola wniosku.</li>
+      <li>Złożenie trafia do administratora. Rekomendacja finansowania jest decyzją w Hubie, nie przelewem.</li>
+    </ul>
+    <p class="foot">6 / 10</p>
+  </section>
+  <section>
+    <h2>Powiadomienia</h2>
+    <ul>
+      <li>Nowa fiszka i nowy wniosek otwierają baner w panelu administratora.</li>
+      <li>Zmiana naboru dopisuje alert na stronie /nabor/subskrypcja.</li>
+      <li>Webhook wychodzi tylko, gdy ustawiono WEBHOOK_URL.</li>
+    </ul>
+    <p class="foot">7 / 10</p>
+  </section>
+  <section>
+    <h2>Pozostałe moduły</h2>
+    <ul>
+      <li>Tester: chęć testu, ocena, propozycja usprawnienia.</li>
+      <li>Wątek przy zgłoszeniu: pytanie i odpowiedź administratora lub eksperta.</li>
+      <li>Middleman: szkic planu wdrożenia z pól karty, oznaczony jako wersja robocza.</li>
+    </ul>
+    <p class="foot">8 / 10</p>
+  </section>
+  <section>
+    <h2>Skala, koszt, dostępność</h2>
+    <ul>
+      <li>Prototyp: SQLite i jeden proces. Nie ma testu tłumu użytkowników.</li>
+      <li>Koszt techniczny pilotażu: około 140–540 zł miesięcznie. Praca ludzi: około 50 godzin.</li>
+      <li>Smoke axe obejmuje ścieżki jury. To nie jest certyfikat WCAG 2.1 AA.</li>
+    </ul>
+    <p class="foot">9 / 10</p>
+  </section>
+  <section>
+    <h2>Jak pokazać demo</h2>
+    <ul>
+      <li>Start: opisz problem. Wynik: trzy karty.</li>
+      <li>Karta z filmem: transkrypcja pod odtwarzaczem.</li>
+      <li>Admin: admin@demo.szczep / demo1234 — baner pomysłu, trendy, wniosek.</li>
+    </ul>
+    <p>Konto eksperta: ekspert@demo.szczep / demo1234.</p>
+    <p class="foot">10 / 10</p>
+  </section>
+</body>
+</html>

@@ -709,6 +709,9 @@ function tokenEmbedding(text: string): number[] {
 }
 
 async function main() {
+  await prisma.application.deleteMany();
+  await prisma.innovationRevision.deleteMany();
+  await prisma.subscription.deleteMany();
   await prisma.message.deleteMany();
   await prisma.thread.deleteMany();
   await prisma.localProfile.deleteMany();
@@ -786,6 +789,24 @@ async function main() {
       ]),
     },
   });
+
+  const trendAreas = ["seniorzy", "zdrowie-psychiczne", "cudzoziemcy"];
+  for (let i = 0; i < 24; i++) {
+    const daysAgo = 3 + (i % 12) * 7;
+    await prisma.submission.create({
+      data: {
+        type: "IDEA",
+        status: "ACCEPTED",
+        publicId: `TREND-${String(i + 1).padStart(2, "0")}`,
+        title: `Zgłoszenie trendu ${i + 1}`,
+        body: "Syntetyczne zgłoszenie do szeregu tygodniowego w panelu administratora.",
+        challengeSlug: trendAreas[i % trendAreas.length],
+        area: trendAreas[i % trendAreas.length],
+        createdAt: new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000),
+        statusEvents: { create: { status: "ACCEPTED", note: "Dane szeregu", actorRole: "system" } },
+      },
+    });
+  }
 
   await prisma.municipalitySnapshot.createMany({
     data: [

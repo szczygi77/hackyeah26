@@ -65,7 +65,11 @@ export async function middleware(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
   const userId = data?.claims.sub;
   if (!userId) {
-    return redirectTo(request, "/login", pendingCookies, pendingHeaders);
+    if (isAdminPath(request.nextUrl.pathname) && request.cookies.get("szczep_session")?.value) {
+      return NextResponse.next();
+    }
+    const dest = isAdminPath(request.nextUrl.pathname) ? "/logowanie" : "/login";
+    return redirectTo(request, dest, pendingCookies, pendingHeaders);
   }
 
   if (isAdminPath(request.nextUrl.pathname)) {

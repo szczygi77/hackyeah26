@@ -13,7 +13,7 @@ npm run db:seed
 npm run dev
 ```
 
-Otwórz http://localhost:3000
+Otwórz http://localhost:3000 — to adres dema na stanowisku jury.
 
 ### Docker
 
@@ -49,9 +49,15 @@ npm run smoke
 
 ## AI (opcjonalnie)
 
-Bez kluczy API działa tryb szablonowy.  
-Z `OPENAI_API_KEY` lub `ANTHROPIC_API_KEY` — lepsze uzasadnienia i Middleman.  
-Limit: `AI_DAILY_LIMIT` (domyślnie 200). Webhook: `WEBHOOK_URL` przy nowej fiszce.
+Bez kluczy działa tryb szablonowy w `src/lib/ai/index.ts`.  
+`OPENAI_API_KEY` lub `ANTHROPIC_API_KEY` — uzasadnienia i Middleman w tym pliku.  
+`GROQ_API_KEY` — osobna ścieżka w `src/lib/rag.ts` i `src/lib/adapt.ts`.  
+Limit: `AI_DAILY_LIMIT` (domyślnie 200). Webhook: `WEBHOOK_URL` przy nowej fiszce i przy złożeniu wniosku. Szczegóły: `AI_USE.md`.
+
+## Skala prototypu
+
+SQLite, jeden proces. Eksport JSON: `/api/export/karty`, `/api/export/zgloszenia` (konto admina).  
+Brak testu wielu użytkowników jednocześnie. Opis zgodny z kodem: `../docs/szczep/zgloszenie/skala-i-integracja.md`.
 
 ## Przydatne URL
 

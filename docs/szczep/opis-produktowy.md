@@ -2,7 +2,7 @@
 
 **Platforma HubMI / ROPS Kraków · wersja 2.1 · aktualizacja pod prototyp wdrożeniowy**
 
-> **Status dokumentu.** Prototyp zaimplementowany w katalogu **`web/`** (z katalogu głównego repozytorium; Next.js + SQLite). Opis wartości dla ROPS: `wartosc-dla-instytucji.md`. Siedem modułów ma ścieżkę end-to-end; UI jest prowadzony jak produkt do codziennego użytku (bez warstwy konkursowej). Nazwa „Szczep" jest robocza. Znaczniki: **[REG]** — regulamin zadania HubMI.pl; **[OPIS]** — opis wyzwania (dokument CRITERIA); **[UMOWA]** — wzór umowy przeniesienia praw (załącznik do regulaminu); **[WEB]** — źródło internetowe; **[JURY]** — źródło z listy materiałów dla uczestników HubMI; **[ZAŁ]** — moje założenie lub propozycja do weryfikacji. Dane startowe w prototypie są **syntetyczne**. Zmiany względem wersji 1 opisuje Załącznik A. Rejestr źródeł: Załącznik C.
+> **Status dokumentu.** Prototyp zaimplementowany w katalogu **`web/`** (z katalogu głównego repozytorium; Next.js + SQLite). Opis wartości dla ROPS: `wartosc-dla-instytucji.md`. Siedem modułów ma ścieżkę end-to-end; UI jest prowadzony jak produkt do codziennego użytku (bez warstwy konkursowej). Nazwa rozwiązania: **Szczep**. Znaczniki: **[REG]** — regulamin zadania HubMI.pl; **[OPIS]** — opis wyzwania (dokument CRITERIA); **[UMOWA]** — wzór umowy przeniesienia praw (załącznik do regulaminu); **[WEB]** — źródło internetowe; **[JURY]** — źródło z listy materiałów dla uczestników HubMI; **[ZAŁ]** — moje założenie lub propozycja do weryfikacji. Dane startowe w prototypie są **syntetyczne**. Zmiany względem wersji 1 opisuje Załącznik A. Rejestr źródeł: Załącznik C.
 
 ---
 
@@ -502,7 +502,7 @@ Automatyczne wyciąganie pól z PDF będzie czasem błędne (źle rozpoznana tab
 
 ### 11.3. Wersjonowanie
 
-Każde zatwierdzenie tworzy nową wersję karty z datą i autorem. Zgłoszenia i dopasowania odnoszą się do konkretnej wersji, więc po aktualizacji widać, które dopasowania mogą być nieaktualne.
+Każdy zapis karty w panelu zwiększa numer wersji i odkłada poprzedni stan w tabeli `InnovationRevision` (numer, data, autor sesji). Dopasowania nie są automatycznie unieważniane po zmianie karty.
 
 ## 12. Zastosowanie sztucznej inteligencji
 
@@ -676,10 +676,10 @@ Zasada: jedna aplikacja, prosta i możliwa do utrzymania przez małą instytucj�
 
 ### 17.1. Skalowalność i integracje [OPIS]
 
-- **Dane z całego województwa:** wolumen kart (setki) i zgłoszeń (tysiące rocznie) jest mały. Wąskim gardłem będzie jakość danych i praca moderatorów, nie technologia.
-- **Duża liczba użytkowników:** obciążenie to głównie model osadzeń i LLM. Środki: pamięć podręczna popularnych zapytań, kolejka dla szkiców, limity. Testów obciążeniowych na hackathonie nie zrobimy; opiszemy to jako ograniczenie.
-- **Integracja z innymi systemami Hubu (np. bazą grantową):** otwarte API (odczyt kart, zapis zgłoszeń), webhooki, eksport CSV/JSON. W MVP: eksport i prosty webhook, jeśli starczy czasu. Format bazy grantowej nieznany.
-- **Elastyczność:** tematy, pola kart i pola naborów konfigurowane z panelu, bez zmiany kodu [ZAŁ].
+- **Dane z całego województwa:** prototyp trzyma dane w SQLite (jeden plik, jeden proces). Setki kart i tysiące zgłoszeń rocznie mieszczą się w tym układzie. To nie jest klaster ani dowód pracy przy dużej liczbie jednoczesnych użytkowników.
+- **Duża liczba użytkowników jednocześnie:** nie ma testu obciążenia. Wąskie gardło prototypu to jeden proces Node i zapis do SQLite. Limity zgłoszeń są w pamięci procesu (`web/src/lib/limits.ts`) i znikają po restarcie.
+- **Integracja:** `POST` na `WEBHOOK_URL` przy nowej fiszce i przy złożeniu wniosku (`idea.created`, `application.submitted`). Bez tej zmiennej webhook nic nie wysyła. Eksport dla administratora: `/api/export/karty` i `/api/export/zgloszenia` (JSON). Pola wniosku biorą się z `Call.fieldsJson`, nie z zewnętrznej bazy grantowej ROPS.
+- **Elastyczność:** nazwa naboru, opis i zestaw pól (`fieldsJson`) ustawiane są przy tworzeniu naboru. Pełna edycja dowolnego pola karty bez zmiany kodu nie jest osobnym konstruktorem schematu.
 
 ## 18. Koszt utrzymania i zasoby
 

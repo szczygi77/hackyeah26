@@ -1,17 +1,12 @@
 # Użycie AI w projekcie Szczep
 
-## W produkcie (runtime)
+## W produkcie 
 
-| Funkcja | Bez klucza API | Z kluczem OpenAI/Anthropic |
-|---------|----------------|----------------------------|
-| Uzasadnienie dopasowania | Szablon + cytat z karty | LLM ograniczony do pól karty; cytat weryfikowany |
-| Middleman (szkic planu) | Szablon 6 sekcji z pól karty | LLM + te same reguły |
-| Szkic karty w adminie | Heurystyka linii tekstu | LLM → JSON pól |
-| Prosty język | Reguły zamiany fraz | (MVP: reguły) |
-| Wyszukiwanie semantyczne | Osadzenia tokenowe lokalne | Te same (API embeddings nie jest wymagane) |
-
-AI **nie** decyduje o grantach, nie publikuje kart bez admina i nie wymyśla faktów spoza karty (cytat musi występować w tekście karty).
-
-## Przy tworzeniu kodu
-
-Kod aplikacji powstawał z asystą AI (Cursor) na podstawie dokumentu `docs/szczep/opis-produktowy.md`. Odpowiedzialność za treść i decyzje produktowe ponosi zespół.
+| Funkcja | Bez klucza | Z kluczem |
+|---|---|---|
+| Uzasadnienie dopasowania w `web/src/lib/ai/index.ts` | Szablon i cytat z karty | `OPENAI_API_KEY` albo `ANTHROPIC_API_KEY` |
+| Middleman w `web/src/lib/ai/index.ts` | Szablon sekcji z pól karty | Ten sam wybór OpenAI / Anthropic |
+| Wyszukiwanie semantyczne i uzasadnienie w `web/src/lib/rag.ts` | Nie działa bez klucza | `GROQ_API_KEY`, model `GROQ_MODEL` (domyślnie `openai/gpt-oss-120b`) |
+| Szkic planu w `web/src/lib/adapt.ts` | Nie działa bez klucza | Ten sam Groq |
+| Prosty język i ranking lokalny | Reguły i nakładanie tokenów w procesie aplikacji | Bez osobnego API embeddingów |
+docs/szczep/opis-produktowy.md`. Odpowiedzialność za treść i decyzje produktowe ponosi zespół.

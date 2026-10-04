@@ -12,7 +12,17 @@ const require = createRequire(import.meta.url);
 const axeSource = readFileSync(require.resolve("axe-core/axe.js"), "utf8");
 
 const base = process.env.A11Y_BASE || "http://127.0.0.1:3000";
-const paths = ["/", "/wyniki?q=samotni+seniorzy", "/karta/telefon-na-dzien-dobry", "/zasobnik", "/logowanie"];
+const paths = [
+  "/",
+  "/wyniki?q=samotni+seniorzy",
+  "/karta/telefon-na-dzien-dobry",
+  "/zasobnik",
+  "/wyzwania",
+  "/pomysl",
+  "/tester",
+  "/partnerstwa",
+  "/logowanie",
+];
 
 const results = [];
 
@@ -62,7 +72,7 @@ const md = [
   `Data: ${new Date().toISOString().slice(0, 10)} · baza: \`${base}\``,
   "",
   "Automatyczny przebieg: `npm run a11y:smoke` (SSR HTML + axe-core + jsdom).",
-  "Pełny audyt przeglądarkowy (axe DevTools / Lighthouse) zalecany przed wdrożeniem.",
+  "To nie jest certyfikat WCAG 2.1 AA. Sprawdza tylko poważne naruszenia na liście ścieżek poniżej.",
   "",
   "| Ścieżka | Critical/serious | Uwagi |",
   "|---|---|---|",
@@ -79,7 +89,7 @@ const md = [
   "| `lang=\"pl\"` | OK |",
   "| Skip-link | OK |",
   "| Baner danych przykładowych | OK |",
-  "| Fonty self-host (`next/font` Figtree/Syne) | OK |",
+  "| Fonty self-host (`next/font`) | OK |",
   "| Tryb prostego tekstu na `/wyniki` i karcie | OK |",
   "| Test z osobami z niepełnosprawnościami | Nie wykonano |",
   "",

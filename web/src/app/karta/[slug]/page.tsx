@@ -67,7 +67,7 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
     <div className="rise">
       <Steps active={1} />
       <p className="hint">
-        <Link href="/zasobnik">Ogłoszenia</Link> / {card.category}
+        <Link href="/zasobnik">Zasobnik</Link> / {card.category}
         {prosty ? " · tekst uproszczony automatycznie" : ""}
       </p>
 
@@ -131,7 +131,13 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
                 ))}
               </p>
             )}
-            <CardMedia materialsJson={card.materialsJson} videoUrl={card.videoUrl} transcript={card.transcript} />
+            <CardMedia
+              title={card.title}
+              materialsJson={card.materialsJson}
+              videoUrl={card.videoUrl}
+              transcript={card.transcript}
+              summary={card.summary}
+            />
           </section>
 
           <section className="panel" style={{ marginTop: "1rem" }} id="test">
