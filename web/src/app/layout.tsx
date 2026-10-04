@@ -34,9 +34,6 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <a className="skip-link" href="#tresc">
           Przejdź do treści
         </a>
-        <div className="site-banner" role="status">
-          Prototyp pilotażowy — katalog innowacji w budowie (ROPS Kraków / HubMI).
-        </div>
         <div className="shell">
           <SiteHeader account={account} />
           <main id="tresc">{children}</main>

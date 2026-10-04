@@ -86,7 +86,6 @@ export async function SiteFooter() {
         </nav>
       </div>
       <div className="footer-bottom">
-        <p>© 2026 ROPS Kraków — Małopolski Hub Innowacji Społecznych.</p>
         <p className="footer-meta">Prototyp pilotażowy. Bez danych osób trzecich.</p>
       </div>
     </footer>
