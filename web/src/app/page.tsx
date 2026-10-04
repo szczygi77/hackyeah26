@@ -39,10 +39,6 @@ export default async function HomePage() {
       <section className="home-hero" id="szukaj" aria-labelledby="search-heading">
         <div className="home-hero-content">
         <h1 id="search-heading">Znajdź innowację do wdrożenia w gminie</h1>
-        <p className="home-lead">
-          Dla urzędu, CUS i organizacji. Opisujesz problem lokalny zwykłymi słowami i dostajesz karty z Biblioteki
-          Innowacji ROPS Kraków. To nie jest pomoc w indywidualnej sprawie mieszkańca.
-        </p>
         <form action={searchAction} className="home-search">
           <div className="field">
             <label htmlFor="q" className="sr-only">

@@ -1331,6 +1331,12 @@ h1 {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
+.home-hero .hint,
+.home-hero .hint a,
+.home-hero .hint a:hover {
+  color: #fff;
+}
+
 .home-hero .privacy-note {
   color: rgba(255, 255, 255, 0.8);
 }
