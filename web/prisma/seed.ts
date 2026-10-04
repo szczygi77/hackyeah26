@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { hashSync } from "bcryptjs";
+import { INKUBATOR_CALL_DESCRIPTION, INKUBATOR_CALL_NAME, INKUBATOR_FIELDS_JSON } from "../src/lib/inkubator-form";
 
 const prisma = new PrismaClient();
 
@@ -775,18 +776,12 @@ async function main() {
 
   await prisma.call.create({
     data: {
-      name: "Nabór innowacji społecznych HubMI",
-      description: "Syntetyczny nabór na potrzeby dema — nie jest naborem ROPS.",
+      name: INKUBATOR_CALL_NAME,
+      description: INKUBATOR_CALL_DESCRIPTION,
       startsAt: new Date("2026-09-01"),
       endsAt: new Date("2026-12-31"),
       active: true,
-      fieldsJson: JSON.stringify([
-        { key: "title", label: "Tytuł pomysłu", from: "title" },
-        { key: "essence", label: "Istota pomysłu", from: "body" },
-        { key: "audience", label: "Dla kogo", from: "roleLabel" },
-        { key: "stage", label: "Etap", from: "area" },
-        { key: "canvas", label: "Kanwa (JSON)", from: "canvasJson" },
-      ]),
+      fieldsJson: INKUBATOR_FIELDS_JSON,
     },
   });
 

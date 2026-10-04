@@ -9,6 +9,7 @@
     "lint": "eslint",
     "a11y:smoke": "node scripts/a11y-smoke.mjs",
     "smoke": "node scripts/smoke.mjs",
+    "test:form": "tsx --test src/lib/inkubator-form.test.ts",
     "e2e": "playwright test",
     "smoke:jury": "node scripts/smoke.mjs",
     "db:push": "prisma db push",

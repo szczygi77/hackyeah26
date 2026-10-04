@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
-import { parseCallFields, prefillFromSubmission } from "@/lib/call-fields";
+import { buildPayload, missingRequired, parseCallFields } from "@/lib/call-fields";
 import { notifyAdmins } from "@/lib/notify";
+import { WniosekForm } from "@/components/WniosekForm";
+import { WniosekAnswers, type SavedAnswer } from "@/components/WniosekAnswers";
 
 const APP_STATUS: Record<string, string> = {
   SUBMITTED: "Złożony w naborze",
@@ -23,12 +25,8 @@ async function submitApplicationAction(formData: FormData) {
   if (!call) redirect(`/pomysl/wniosek/${publicId}?err=brak`);
 
   const fields = parseCallFields(call.fieldsJson);
-  const payload = fields.map((field) => ({
-    key: field.key,
-    label: field.label,
-    value: String(formData.get(field.key) || "").trim(),
-  }));
-  if (payload.some((row) => !row.value)) redirect(`/pomysl/wniosek/${publicId}?err=pola`);
+  if (missingRequired(fields, formData)) redirect(`/pomysl/wniosek/${publicId}?err=pola`);
+  const payload = buildPayload(fields, formData);
 
   const app = await prisma.application.create({
     data: {
@@ -75,8 +73,7 @@ export default async function ApplicationDraftPage({
   });
   if (!sub || sub.type !== "IDEA") notFound();
   const call = sub.application?.call || (await prisma.call.findFirst({ where: { active: true } }));
-  const fields = call ? parseCallFields(call.fieldsJson) : [];
-  let saved: { key: string; label: string; value: string }[] = [];
+  let saved: SavedAnswer[] = [];
   if (sub.application) {
     try {
       saved = JSON.parse(sub.application.payloadJson);
@@ -84,6 +81,7 @@ export default async function ApplicationDraftPage({
       saved = [];
     }
   }
+  const draftFields = call ? parseCallFields(call.fieldsJson) : [];
 
   return (
     <div className="rise">
@@ -94,9 +92,12 @@ export default async function ApplicationDraftPage({
       {!call ? (
         <p role="alert">Brak aktywnego naboru. Wniosek można złożyć tylko w otwartym naborze.</p>
       ) : (
-        <p>
-          Nabór: <strong>{call.name}</strong>. {call.description}
-        </p>
+        <>
+          <p>
+            Nabór: <strong>{call.name}</strong>. {call.description}
+          </p>
+          <p className="hint">Prototyp nie wysyła wniosku do systemów ROPS.</p>
+        </>
       )}
       {err === "pola" ? <p role="alert">Uzupełnij wszystkie pola wniosku.</p> : null}
       {err === "brak" ? <p role="alert">Nabór został zamknięty przed złożeniem.</p> : null}
@@ -111,33 +112,16 @@ export default async function ApplicationDraftPage({
             Hubu, nie przelewem środków.
           </p>
           {sub.application.decisionNote ? <p>{sub.application.decisionNote}</p> : null}
-          <dl>
-            {saved.map((row) => (
-              <div key={row.key}>
-                <dt>{row.label}</dt>
-                <dd style={{ marginLeft: 0, whiteSpace: "pre-wrap" }}>{row.value}</dd>
-              </div>
-            ))}
-          </dl>
+          <WniosekAnswers answers={saved} />
         </section>
       ) : call ? (
-        <form action={submitApplicationAction} className="panel">
-          <input type="hidden" name="publicId" value={publicId} />
-          {fields.map((field) => (
-            <div className="field" key={field.key}>
-              <label htmlFor={field.key}>{field.label}</label>
-              <textarea
-                id={field.key}
-                name={field.key}
-                required
-                defaultValue={prefillFromSubmission(field, sub)}
-              />
-            </div>
-          ))}
-          <button className="btn" type="submit">
-            Złóż wniosek w tym naborze
-          </button>
-        </form>
+        <WniosekForm
+          action={submitApplicationAction}
+          publicId={publicId}
+          fields={draftFields}
+          source={sub}
+          showRodo={draftFields.some((field) => field.section === "12")}
+        />
       ) : null}
 
       <p>
