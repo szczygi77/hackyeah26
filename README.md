@@ -25,8 +25,6 @@ cd web && cp .env.example .env && npm install && npx prisma db push && npm run d
 | `docs/szczep/zadanie/` | Kryteria zadania HubMI |
 | `docs/szczep/archiwum/` | Starsza wersja opisu |
 | `docs/szczep/media/` | Obrazy robocze, poza aplikacją |
-| `docs/pauza/` | Drugie zadanie (Bank Pekao). Osobny opis, bez kodu w tym repo |
 
-## Pauza
 
-[docs/pauza/opis-zaktualizowany.md](docs/pauza/opis-zaktualizowany.md) — aktualny opis. [docs/pauza/opis.md](docs/pauza/opis.md) — wcześniejsza wersja.
+
